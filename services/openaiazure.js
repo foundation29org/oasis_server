@@ -6,44 +6,38 @@ const request = require('request')
 const serviceEmail = require('../services/email')
 const Generalfeedback = require('../models/generalfeedback')
 const Vote = require('../models/vote')
-const ApiManagementKey = config.API_MANAGEMENT_KEY;
 
-const axios = require('axios');
-const e = require("express");
+const endpoint = config.AZURE_OPENAI_ENDPOINT;
+const azureApiKey = config.AZURE_OPENAI_KEY;
 
 
 async function callOpenAi (req, res){
-  //comprobar créditos del usuario
-  
-
   var jsonText = req.body.value;
   (async () => {
     try {
+
+      const client = new OpenAIClient(endpoint, new AzureKeyCredential(azureApiKey));
+      const deploymentId = "normalcalls";
       const messages = [
         { role: "user", content: jsonText}
       ];
-      const deploymentId = "sermas";
-      const requestBody = {
-        messages: messages,
+
+      const configCall = {
         temperature: 0,
         max_tokens: 800,
         top_p: 1,
         frequency_penalty: 0,
-        presence_penalty: 0,
-      };
-
-      // Realizar la solicitud a Azure API Management
-      const result = await axios.post('https://sermasapiopenai.azure-api.net/openai/deployments', requestBody,{
-        headers: {
-            'Content-Type': 'application/json',
-            'Ocp-Apim-Subscription-Key': ApiManagementKey,
-        }
-    });    
-      if(result.data.choices[0].message.content == undefined){
-        //send email
-        serviceEmail.sendMailErrorGPT(req.body.value, result.data.choices)
+        presence_penalty: 0
       }
-      res.status(200).send(result.data)
+
+      const result = await client.getChatCompletions(deploymentId, messages, configCall);
+
+  
+      if(result.choices[0].message.content == undefined){
+        //send email
+        serviceEmail.sendMailErrorGPT(req.body.value, result.choices)
+      }
+      res.status(200).send(result)
     }catch(e){
       insights.error(e);
       console.log(e)
@@ -94,26 +88,25 @@ async function callOpenAiAnonymized(req, res) {
   ANONYMIZED DOCUMENT:"`;
 
   try {
+
+    const client = new OpenAIClient(endpoint, new AzureKeyCredential(azureApiKey));
+    const deploymentId = "anonymized";
+
     const messages = [
       { role: "user", content: anonymizationPrompt}
     ];
-    const requestBody = {
-      messages: messages,
+
+    const configCall = {
       temperature: 0,
       max_tokens: 2000,
       top_p: 1,
       frequency_penalty: 0,
-      presence_penalty: 0,
-    };
+      presence_penalty: 0
+    }
 
-    // Realizar la solicitud a Azure API Management
-    const result = await axios.post('https://sermasapiopenai.azure-api.net/openai/anonymized', requestBody,{
-      headers: {
-          'Content-Type': 'application/json',
-          'Ocp-Apim-Subscription-Key': ApiManagementKey,
-      }
-    });
-    res.status(200).send(result.data)
+    const result = await client.getChatCompletions(deploymentId, messages, configCall);
+
+    res.status(200).send(result)
   } catch(e) {
     insights.error(e);
     console.log(e)
