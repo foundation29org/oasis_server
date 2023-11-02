@@ -27,7 +27,7 @@ const corsOptions = {
   };
 
 // lang routes, using the controller lang, this controller has methods
-api.get('/langs/', cors(corsOptions),  langCtrl.getLangs)
+api.get('/langs/',  langCtrl.getLangs)
 
 //Support
 api.post('/sendmsg/', cors(corsOptions), supportCtrl.sendMsg)
