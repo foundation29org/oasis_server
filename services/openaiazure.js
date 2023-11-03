@@ -2,13 +2,12 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 const config = require('../config')
 const insights = require('../services/insights')
-const request = require('request')
 const serviceEmail = require('../services/email')
 const Generalfeedback = require('../models/generalfeedback')
+const axios = require('axios');
 const Vote = require('../models/vote')
 
-const endpoint = config.AZURE_OPENAI_ENDPOINT;
-const azureApiKey = config.AZURE_OPENAI_KEY;
+const ApiManagementKey = config.API_MANAGEMENT_KEY;
 
 
 async function callOpenAi (req, res){
@@ -16,28 +15,31 @@ async function callOpenAi (req, res){
   (async () => {
     try {
 
-      const client = new OpenAIClient(endpoint, new AzureKeyCredential(azureApiKey));
-      const deploymentId = "normalcalls";
       const messages = [
         { role: "user", content: jsonText}
       ];
 
-      const configCall = {
+      const requestBody = {
+        messages: messages,
         temperature: 0,
         max_tokens: 800,
         top_p: 1,
         frequency_penalty: 0,
-        presence_penalty: 0
-      }
+        presence_penalty: 0,
+      };
 
-      const result = await client.getChatCompletions(deploymentId, messages, configCall);
-
+      const result = await axios.post('https://sermasapiopenai.azure-api.net/oasis/deployments', requestBody,{
+        headers: {
+            'Content-Type': 'application/json',
+            'Ocp-Apim-Subscription-Key': ApiManagementKey,
+        }
+    }); 
   
-      if(result.choices[0].message.content == undefined){
+      if(result.data.choices[0].message.content == undefined){
         //send email
-        serviceEmail.sendMailErrorGPT(req.body.value, result.choices)
+        serviceEmail.sendMailErrorGPT(req.body.value, result.data.choices)
       }
-      res.status(200).send(result)
+      res.status(200).send(result.data)
     }catch(e){
       insights.error(e);
       console.log(e)
@@ -89,24 +91,27 @@ async function callOpenAiAnonymized(req, res) {
 
   try {
 
-    const client = new OpenAIClient(endpoint, new AzureKeyCredential(azureApiKey));
-    const deploymentId = "anonymized";
-
     const messages = [
       { role: "user", content: anonymizationPrompt}
     ];
 
-    const configCall = {
+    const requestBody = {
+      messages: messages,
       temperature: 0,
       max_tokens: 2000,
       top_p: 1,
       frequency_penalty: 0,
-      presence_penalty: 0
-    }
+      presence_penalty: 0,
+    };
 
-    const result = await client.getChatCompletions(deploymentId, messages, configCall);
+    const result = await axios.post('https://sermasapiopenai.azure-api.net/oasis/anonymized', requestBody,{
+        headers: {
+            'Content-Type': 'application/json',
+            'Ocp-Apim-Subscription-Key': ApiManagementKey,
+        }
+    }); 
 
-    res.status(200).send(result)
+    res.status(200).send(result.data)
   } catch(e) {
     insights.error(e);
     console.log(e)
