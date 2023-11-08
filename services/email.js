@@ -28,7 +28,7 @@ function sendMailSupport (description){
       to: TRANSPORTER_OPTIONS.auth.user,
       from: TRANSPORTER_OPTIONS.auth.user,
       bcc: maillistbcc,
-      subject: 'Mensaje para soporte de SermasGPT',
+      subject: 'Mensaje para soporte de OasisGPT',
       template: 'mail_support/_es',
       context: {
         description: description
@@ -62,7 +62,7 @@ function sendMailErrorGPT (req, response){
       to: TRANSPORTER_OPTIONS.auth.user,
       from: TRANSPORTER_OPTIONS.auth.user,
       bcc: maillistbcc,
-      subject: 'Mensaje para soporte de SermasGPT - Error GPT',
+      subject: 'Mensaje para soporte de OasisGPT - Error GPT',
       template: 'mail_error_gpt/_es',
       context: {
         info: JSON.stringify(req), 
@@ -97,7 +97,7 @@ function sendMailFeedback (description){
       to: TRANSPORTER_OPTIONS.auth.user,
       from: TRANSPORTER_OPTIONS.auth.user,
       bcc: maillistbcc,
-      subject: 'Mensaje para soporte de SermasGPT - Feedback Down',
+      subject: 'Mensaje para soporte de OasisGPT - Feedback Down',
       template: 'mail_feedback/_es',
       context: {
         description: description
@@ -132,7 +132,7 @@ function sendMailGeneralFeedback (info, myuuid){
       to: TRANSPORTER_OPTIONS.auth.user,
       from: TRANSPORTER_OPTIONS.auth.user,
       bcc: maillistbcc,
-      subject: 'Mensaje para soporte de SermasGPT - Feedback General',
+      subject: 'Mensaje para soporte de OasisGPT - Feedback General',
       template: 'mail_general_feedback/_es',
       context: {
         myuuid: myuuid,
@@ -160,10 +160,45 @@ function sendMailGeneralFeedback (info, myuuid){
   return decoded
 }
 
+function sendMailControlCall (req){
+  const decoded = new Promise((resolve, reject) => {
+    var maillistbcc = [
+      TRANSPORTER_OPTIONS.auth.user
+    ];
+
+    var mailOptions = {
+      to: TRANSPORTER_OPTIONS.auth.user,
+      from: TRANSPORTER_OPTIONS.auth.user,
+      bcc: maillistbcc,
+      subject: 'Mensaje para soporte de DxGPT - ControlCall',
+      template: 'mail_error_control_call/_es',
+      context: {
+        info: JSON.stringify(req)
+      }
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        insights.error(error);
+        console.log(error);
+        reject({
+          status: 401,
+          message: 'Fail sending email'
+        })
+      } else {
+        resolve("ok")
+      }
+    });
+
+  });
+  return decoded
+}
+
 
 module.exports = {
   sendMailSupport,
   sendMailErrorGPT,
   sendMailFeedback,
-  sendMailGeneralFeedback
+  sendMailGeneralFeedback,
+  sendMailControlCall
 }
