@@ -10,7 +10,7 @@ const insights = require('../../services/insights')
 function sendMsg(req, res){
 	let support = new Support()
 	//support.type = 'Home form'
-	support.subject = 'SermasGPT support'
+	support.subject = 'OasisGPT support'
 	support.description = req.body.description
 	support.save((err, supportStored) => {
 	})
