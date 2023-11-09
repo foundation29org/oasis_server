@@ -36,6 +36,7 @@ function setCrossDomain(req, res, next) {
         query: req.query,
       };
     serviceEmail.sendMailControlCall(requestInfo)
+    res.status(401).json({ error: 'Origin not allowed' });
   }
 }
 
