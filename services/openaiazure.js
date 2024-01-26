@@ -28,7 +28,7 @@ async function callOpenAi (req, res){
         presence_penalty: 0,
       };
 
-      const result = await axios.post('https://sermasapiopenai.azure-api.net/oasis/deployments', requestBody,{
+      const result = await axios.post('https://apiopenai.azure-api.net/oasis/deployments', requestBody,{
         headers: {
             'Content-Type': 'application/json',
             'Ocp-Apim-Subscription-Key': ApiManagementKey,
@@ -104,7 +104,7 @@ async function callOpenAiAnonymized(req, res) {
       presence_penalty: 0,
     };
 
-    const result = await axios.post('https://sermasapiopenai.azure-api.net/oasis/anonymized', requestBody,{
+    const result = await axios.post('https://apiopenai.azure-api.net/oasis/anonymized', requestBody,{
         headers: {
             'Content-Type': 'application/json',
             'Ocp-Apim-Subscription-Key': ApiManagementKey,
