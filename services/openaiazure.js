@@ -65,7 +65,7 @@ async function callOpenAi (req, res){
 						console.log('Fail sending email');
 					})
 
-      res.status(500).send(e)
+      res.status(500).send('error')
     }
     
   })();
@@ -122,7 +122,7 @@ async function callOpenAiAnonymized(req, res) {
       console.log(e.message);
     }
     console.error("[ERROR]: " + e)
-    res.status(500).send(e)
+    res.status(500).send('error')
   }
 }
 
